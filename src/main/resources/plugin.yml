@@ -1,0 +1,17 @@
+name: RandomChunks
+version: ${project.version}
+main: fr.lorderis.randomchunks.RandomChunksPlugin
+api-version: 1.21
+description: Transforms every block in a chunk to a random single block type on first player entry.
+authors: [LordEris]
+
+commands:
+  randomchunks:
+    description: RandomChunks plugin commands.
+    aliases: [rcg]
+    usage: /<command> [reload|reset <world>|info]
+
+permissions:
+  randomchunks.admin:
+    description: Access to all RandomChunks admin commands.
+    default: op

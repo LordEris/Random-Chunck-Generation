@@ -1,0 +1,26 @@
+# RandomChunks configuration
+
+# List of worlds where the plugin is active. Leave empty to apply to all worlds.
+enabled-worlds: []
+
+# Block types that can be selected for chunk transformation.
+# Uses Bukkit Material names: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
+# Leave empty to use ALL solid, placeable blocks (default behaviour).
+block-pool: []
+
+# If true, the original terrain below sea level (y < 64) is preserved and only
+# blocks at or above sea level are replaced. Set to false to replace everything.
+preserve-bedrock: true
+
+# Height range for block replacement (inclusive).
+# min-y: lowest Y level to replace (default: -64, world bottom)
+# max-y: highest Y level to replace (default: 320, world top)
+min-y: -64
+max-y: 320
+
+# Send a message to the player when their chunk is transformed.
+notify-player: true
+notify-message: "&7[&bRandomChunks&7] &fChunk transformé en &e{block}&f !"
+
+# Save transformed chunk data to disk so they survive server restarts.
+persist-data: true
