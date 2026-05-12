@@ -38,8 +38,8 @@ public class RandomChunksCommand implements CommandExecutor, TabCompleter {
                 sender.sendMessage("§a[RandomChunks] Configuration rechargée.");
             }
             case "reset" -> {
-                if (!sender.isOp()) {
-                    sender.sendMessage("§cSeuls les opérateurs peuvent utiliser cette commande.");
+                if (!sender.isOp() && !sender.hasPermission("randomchunks.admin")) {
+                    sender.sendMessage("§cVous n'avez pas la permission.");
                     return true;
                 }
                 if (args.length < 2) {
