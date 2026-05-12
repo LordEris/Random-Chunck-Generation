@@ -7,7 +7,7 @@ Plugin Spigot 1.21 — à chaque fois qu'un joueur entre dans un chunk non trans
 | Commande | Description | Permission |
 |---|---|---|
 | `/rcg reload` | Recharge la configuration | `randomchunks.admin` |
-| `/rcg reset <world>` | Réinitialise les chunks transformés d'un monde | `randomchunks.admin` + op |
+| `/rcg reset <world>` | Réinitialise les chunks transformés d'un monde | `randomchunks.admin` ou op |
 | `/rcg info` | Affiche le nombre de blocs dans le pool et les chunks transformés | `randomchunks.admin` |
 
 ## Configuration
