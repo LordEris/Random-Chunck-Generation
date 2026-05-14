@@ -5,15 +5,15 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ChunkDataManager {
 
     private final RandomChunksPlugin plugin;
     private final File dataFile;
-    private final Set<String> transformedChunks = new HashSet<>();
+    private final Set<String> transformedChunks = ConcurrentHashMap.newKeySet();
 
     public ChunkDataManager(RandomChunksPlugin plugin) {
         this.plugin = plugin;
@@ -23,8 +23,7 @@ public class ChunkDataManager {
     public void load() {
         if (!dataFile.exists()) return;
         YamlConfiguration config = YamlConfiguration.loadConfiguration(dataFile);
-        List<String> keys = config.getStringList("chunks");
-        transformedChunks.addAll(keys);
+        transformedChunks.addAll(config.getStringList("chunks"));
         plugin.getLogger().info(transformedChunks.size() + " chunks transformés chargés.");
     }
 
@@ -39,12 +38,12 @@ public class ChunkDataManager {
         }
     }
 
-    public boolean isTransformed(String worldName, int chunkX, int chunkZ) {
-        return transformedChunks.contains(key(worldName, chunkX, chunkZ));
+    public boolean isTransformed(String world, int cx, int cz) {
+        return transformedChunks.contains(key(world, cx, cz));
     }
 
-    public void markTransformed(String worldName, int chunkX, int chunkZ) {
-        transformedChunks.add(key(worldName, chunkX, chunkZ));
+    public void markTransformed(String world, int cx, int cz) {
+        transformedChunks.add(key(world, cx, cz));
     }
 
     public void resetWorld(String worldName) {
@@ -55,7 +54,7 @@ public class ChunkDataManager {
         return transformedChunks.size();
     }
 
-    private String key(String world, int x, int z) {
+    private static String key(String world, int x, int z) {
         return world + ":" + x + ":" + z;
     }
 }

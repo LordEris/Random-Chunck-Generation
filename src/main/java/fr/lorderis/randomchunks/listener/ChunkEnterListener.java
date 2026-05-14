@@ -1,16 +1,15 @@
 package fr.lorderis.randomchunks.listener;
 
 import fr.lorderis.randomchunks.RandomChunksPlugin;
-import fr.lorderis.randomchunks.data.ChunkDataManager;
 import org.bukkit.Chunk;
+import org.bukkit.ChunkSnapshot;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Player;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.world.ChunkLoadEvent;
 
 import java.util.List;
 
@@ -23,72 +22,56 @@ public class ChunkEnterListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onPlayerMove(PlayerMoveEvent event) {
-        if (event.getFrom().getBlockX() >> 4 == event.getTo().getBlockX() >> 4
-                && event.getFrom().getBlockZ() >> 4 == event.getTo().getBlockZ() >> 4) {
-            return;
-        }
-
-        Player player = event.getPlayer();
-        World world = player.getWorld();
+    public void onChunkLoad(ChunkLoadEvent event) {
+        Chunk chunk = event.getChunk();
+        World world = chunk.getWorld();
 
         List<String> enabledWorlds = plugin.getConfig().getStringList("enabled-worlds");
-        if (!enabledWorlds.isEmpty() && !enabledWorlds.contains(world.getName())) {
-            return;
+        if (!enabledWorlds.isEmpty() && !enabledWorlds.contains(world.getName())) return;
+
+        if (plugin.getDataManager().isTransformed(world.getName(), chunk.getX(), chunk.getZ())) return;
+
+        int radius = plugin.getConfig().getInt("spawn-protection-radius", 10);
+        if (radius > 0) {
+            int spawnCX = world.getSpawnLocation().getBlockX() >> 4;
+            int spawnCZ = world.getSpawnLocation().getBlockZ() >> 4;
+            if (Math.abs(chunk.getX() - spawnCX) <= radius && Math.abs(chunk.getZ() - spawnCZ) <= radius) return;
         }
 
-        Chunk chunk = event.getTo().getChunk();
-        int cx = chunk.getX();
-        int cz = chunk.getZ();
-        ChunkDataManager dataManager = plugin.getDataManager();
-
-        if (dataManager.isTransformed(world.getName(), cx, cz)) {
-            return;
-        }
-
-        dataManager.markTransformed(world.getName(), cx, cz);
-
-        Material chosen = plugin.getBlockPool().random();
-        transformChunk(world, chunk, chosen);
-
-        if (plugin.getConfig().getBoolean("notify-player", true)) {
-            String msg = plugin.getConfig()
-                    .getString("notify-message", "&7[&bRandomChunks&7] &fChunk transformé en &e{block}&f !")
-                    .replace("{block}", chosen.name())
-                    .replace("&", "§");
-            player.sendMessage(msg);
-        }
+        plugin.getDataManager().markTransformed(world.getName(), chunk.getX(), chunk.getZ());
+        transform(world, chunk);
     }
 
-    private void transformChunk(World world, Chunk chunk, Material material) {
-        int minY = plugin.getConfig().getInt("min-y", world.getMinHeight());
-        int maxY = plugin.getConfig().getInt("max-y", world.getMaxHeight() - 1);
+    private void transform(World world, Chunk chunk) {
+        int minY = Math.max(plugin.getConfig().getInt("min-y", world.getMinHeight()), world.getMinHeight());
+        int maxY = Math.min(plugin.getConfig().getInt("max-y", world.getMaxHeight() - 1), world.getMaxHeight() - 1);
         boolean preserveBedrock = plugin.getConfig().getBoolean("preserve-bedrock", true);
+        Material material = plugin.getBlockPool().random();
 
-        minY = Math.max(minY, world.getMinHeight());
-        maxY = Math.min(maxY, world.getMaxHeight() - 1);
-
-        int baseX = chunk.getX() << 4;
-        int baseZ = chunk.getZ() << 4;
+        ChunkSnapshot snapshot = chunk.getChunkSnapshot(false, false, false);
+        int capacity = 16 * 16 * (maxY - minY + 1);
+        int[] buf = new int[capacity * 3];
+        int count = 0;
 
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
                 for (int y = minY; y <= maxY; y++) {
-                    Block block = world.getBlockAt(baseX + x, y, baseZ + z);
-
-                    Material type = block.getType();
-
-                    if (type == Material.WATER || type == Material.LAVA) {
-                        continue;
-                    }
-
-                    if (preserveBedrock && type == Material.BEDROCK) {
-                        continue;
-                    }
-
-                    block.setType(material, false);
+                    Material type = snapshot.getBlockType(x, y, z);
+                    if (type.isAir()) continue;
+                    if (type == material) continue;
+                    if (preserveBedrock && type == Material.BEDROCK) continue;
+                    if (plugin.getBlockPool().isExcluded(type)) continue;
+                    buf[count    ] = x;
+                    buf[count + 1] = y;
+                    buf[count + 2] = z;
+                    count += 3;
                 }
             }
+        }
+
+        BlockData targetData = material.createBlockData();
+        for (int i = 0; i < count; i += 3) {
+            chunk.getBlock(buf[i], buf[i + 1], buf[i + 2]).setBlockData(targetData, false);
         }
     }
 }

@@ -8,7 +8,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -38,10 +37,6 @@ public class RandomChunksCommand implements CommandExecutor, TabCompleter {
                 sender.sendMessage("§a[RandomChunks] Configuration rechargée.");
             }
             case "reset" -> {
-                if (!sender.isOp() && !sender.hasPermission("randomchunks.admin")) {
-                    sender.sendMessage("§cVous n'avez pas la permission.");
-                    return true;
-                }
                 if (args.length < 2) {
                     sender.sendMessage("§cUsage: /" + label + " reset <world>");
                     return true;
@@ -58,9 +53,8 @@ public class RandomChunksCommand implements CommandExecutor, TabCompleter {
             }
             case "info" -> {
                 BlockPool pool = plugin.getBlockPool();
-                int total = plugin.getDataManager().totalTransformed();
                 sender.sendMessage("§b[RandomChunks] §fBlocs dans le pool : §e" + pool.size());
-                sender.sendMessage("§b[RandomChunks] §fChunks transformés (session+disque) : §e" + total);
+                sender.sendMessage("§b[RandomChunks] §fChunks transformés : §e" + plugin.getDataManager().totalTransformed());
             }
             default -> sendHelp(sender, label);
         }
@@ -70,14 +64,14 @@ public class RandomChunksCommand implements CommandExecutor, TabCompleter {
     private void sendHelp(CommandSender sender, String label) {
         sender.sendMessage("§b--- RandomChunks ---");
         sender.sendMessage("§e/" + label + " reload §f- Recharge la config");
-        sender.sendMessage("§e/" + label + " reset <world> §f- Réinitialise les chunks d'un monde §7(op)");
+        sender.sendMessage("§e/" + label + " reset <world> §f- Réinitialise les chunks d'un monde");
         sender.sendMessage("§e/" + label + " info §f- Affiche les statistiques du plugin");
     }
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
-            return Arrays.asList("reload", "reset", "info").stream()
+            return List.of("reload", "reset", "info").stream()
                     .filter(s -> s.startsWith(args[0].toLowerCase()))
                     .collect(Collectors.toList());
         }
