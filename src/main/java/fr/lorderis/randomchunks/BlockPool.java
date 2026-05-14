@@ -10,7 +10,9 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class BlockPool {
 
-    private static final Set<Material> EXCLUDED = EnumSet.of(
+    private static final Set<Material> EXCLUDED;
+    static {
+        EXCLUDED = EnumSet.of(
             Material.AIR, Material.CAVE_AIR, Material.VOID_AIR,
             Material.WATER, Material.LAVA,
             Material.BEDROCK,
@@ -149,8 +151,50 @@ public class BlockPool {
             Material.BAMBOO_PRESSURE_PLATE, Material.CRIMSON_PRESSURE_PLATE,
             Material.WARPED_PRESSURE_PLATE, Material.STONE_PRESSURE_PLATE,
             Material.LIGHT_WEIGHTED_PRESSURE_PLATE, Material.HEAVY_WEIGHTED_PRESSURE_PLATE,
-            Material.POLISHED_BLACKSTONE_PRESSURE_PLATE
-    );
+            Material.POLISHED_BLACKSTONE_PRESSURE_PLATE,
+            Material.IRON_BARS,
+            Material.COPPER_GRATE, Material.EXPOSED_COPPER_GRATE,
+            Material.WEATHERED_COPPER_GRATE, Material.OXIDIZED_COPPER_GRATE,
+            Material.WAXED_COPPER_GRATE, Material.WAXED_EXPOSED_COPPER_GRATE,
+            Material.WAXED_WEATHERED_COPPER_GRATE, Material.WAXED_OXIDIZED_COPPER_GRATE,
+            Material.SAND, Material.RED_SAND,
+            Material.GRAVEL,
+            Material.ANVIL, Material.CHIPPED_ANVIL, Material.DAMAGED_ANVIL,
+            Material.WHITE_CONCRETE_POWDER, Material.ORANGE_CONCRETE_POWDER,
+            Material.MAGENTA_CONCRETE_POWDER, Material.LIGHT_BLUE_CONCRETE_POWDER,
+            Material.YELLOW_CONCRETE_POWDER, Material.LIME_CONCRETE_POWDER,
+            Material.PINK_CONCRETE_POWDER, Material.GRAY_CONCRETE_POWDER,
+            Material.LIGHT_GRAY_CONCRETE_POWDER, Material.CYAN_CONCRETE_POWDER,
+            Material.PURPLE_CONCRETE_POWDER, Material.BLUE_CONCRETE_POWDER,
+            Material.BROWN_CONCRETE_POWDER, Material.GREEN_CONCRETE_POWDER,
+            Material.RED_CONCRETE_POWDER, Material.BLACK_CONCRETE_POWDER,
+            Material.DRAGON_EGG,
+            Material.POINTED_DRIPSTONE,
+            Material.SCAFFOLDING,
+            Material.FLOWER_POT,
+            Material.POTTED_OAK_SAPLING, Material.POTTED_SPRUCE_SAPLING,
+            Material.POTTED_BIRCH_SAPLING, Material.POTTED_JUNGLE_SAPLING,
+            Material.POTTED_ACACIA_SAPLING, Material.POTTED_DARK_OAK_SAPLING,
+            Material.POTTED_FERN, Material.POTTED_DEAD_BUSH, Material.POTTED_CACTUS,
+            Material.POTTED_DANDELION, Material.POTTED_POPPY,
+            Material.POTTED_BLUE_ORCHID, Material.POTTED_ALLIUM,
+            Material.POTTED_AZURE_BLUET, Material.POTTED_RED_TULIP,
+            Material.POTTED_ORANGE_TULIP, Material.POTTED_WHITE_TULIP,
+            Material.POTTED_PINK_TULIP, Material.POTTED_OXEYE_DAISY,
+            Material.POTTED_CORNFLOWER, Material.POTTED_LILY_OF_THE_VALLEY,
+            Material.POTTED_WITHER_ROSE,
+            Material.POTTED_RED_MUSHROOM, Material.POTTED_BROWN_MUSHROOM,
+            Material.POTTED_CRIMSON_FUNGUS, Material.POTTED_WARPED_FUNGUS,
+            Material.POTTED_CRIMSON_ROOTS, Material.POTTED_WARPED_ROOTS,
+            Material.POTTED_AZALEA_BUSH, Material.POTTED_FLOWERING_AZALEA_BUSH,
+            Material.POTTED_BAMBOO, Material.POTTED_TORCHFLOWER,
+            Material.POTTED_CHERRY_SAPLING, Material.POTTED_MANGROVE_PROPAGULE
+        );
+        for (String name : new String[]{"CHAIN"}) {
+            Material mat = Material.matchMaterial(name);
+            if (mat != null) EXCLUDED.add(mat);
+        }
+    }
 
     private final Material[] pool;
 

@@ -10,3 +10,5 @@ max-y: 320
 spawn-protection-radius: 2
 
 persist-data: true
+
+pregen-chunks-per-tick: 10

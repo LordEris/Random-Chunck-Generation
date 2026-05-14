@@ -9,7 +9,7 @@ commands:
   randomchunks:
     description: RandomChunks plugin commands.
     aliases: [rcg]
-    usage: /<command> [reload|reset <world>|info]
+    usage: /<command> [reload|reset <world>|info|pregen <start|stop|status>]
 
 permissions:
   randomchunks.admin:
