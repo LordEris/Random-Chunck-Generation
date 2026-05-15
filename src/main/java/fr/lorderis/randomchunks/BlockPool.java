@@ -30,8 +30,10 @@ public class BlockPool {
             Material.CORNFLOWER, Material.LILY_OF_THE_VALLEY, Material.WITHER_ROSE,
             Material.TORCHFLOWER, Material.PITCHER_PLANT,
             Material.SUNFLOWER, Material.LILAC, Material.ROSE_BUSH, Material.PEONY,
+            Material.PINK_PETALS,
             Material.OAK_SAPLING, Material.SPRUCE_SAPLING, Material.BIRCH_SAPLING,
             Material.JUNGLE_SAPLING, Material.ACACIA_SAPLING, Material.DARK_OAK_SAPLING,
+            Material.CHERRY_SAPLING, Material.BAMBOO_SAPLING, Material.MANGROVE_PROPAGULE,
             Material.AZALEA, Material.FLOWERING_AZALEA,
             Material.BROWN_MUSHROOM, Material.RED_MUSHROOM,
             Material.LILY_PAD, Material.SEAGRASS, Material.SEA_PICKLE,
@@ -90,7 +92,7 @@ public class BlockPool {
             Material.CYAN_SHULKER_BOX, Material.PURPLE_SHULKER_BOX, Material.BLUE_SHULKER_BOX,
             Material.BROWN_SHULKER_BOX, Material.GREEN_SHULKER_BOX, Material.RED_SHULKER_BOX,
             Material.BLACK_SHULKER_BOX,
-            Material.SPAWNER, Material.TRIAL_SPAWNER, Material.VAULT, Material.CRAFTER,
+            Material.SPAWNER, Material.TRIAL_SPAWNER, Material.VAULT, Material.CRAFTER, Material.HEAVY_CORE,
             Material.OAK_SIGN, Material.SPRUCE_SIGN, Material.BIRCH_SIGN, Material.JUNGLE_SIGN,
             Material.ACACIA_SIGN, Material.DARK_OAK_SIGN, Material.MANGROVE_SIGN,
             Material.CHERRY_SIGN, Material.BAMBOO_SIGN, Material.CRIMSON_SIGN, Material.WARPED_SIGN,
@@ -128,7 +130,7 @@ public class BlockPool {
             Material.CHISELED_BOOKSHELF, Material.DECORATED_POT,
             Material.BEE_NEST, Material.BEEHIVE,
             Material.SCULK_SENSOR, Material.CALIBRATED_SCULK_SENSOR,
-            Material.SCULK_SHRIEKER, Material.SCULK_CATALYST,
+            Material.SCULK_SHRIEKER, Material.SCULK_CATALYST, Material.SCULK_VEIN,
             Material.SUSPICIOUS_SAND, Material.SUSPICIOUS_GRAVEL,
             Material.COMPARATOR,
             Material.TORCH, Material.WALL_TORCH,
@@ -190,6 +192,10 @@ public class BlockPool {
             Material.POTTED_BAMBOO, Material.POTTED_TORCHFLOWER,
             Material.POTTED_CHERRY_SAPLING, Material.POTTED_MANGROVE_PROPAGULE
         );
+        // Chiseled bookshelf (bloc avec inventaire)
+        EXCLUDED.add(Material.CHISELED_BOOKSHELF);
+        // Ladders
+        EXCLUDED.add(Material.LADDER);
         // Bell
         EXCLUDED.add(Material.BELL);
         // Amethyst buds & cluster
@@ -309,6 +315,48 @@ public class BlockPool {
             "WAXED_EXPOSED_COPPER_GOLEM_STATUE",
             "WAXED_WEATHERED_COPPER_GOLEM_STATUE",
             "WAXED_OXIDIZED_COPPER_GOLEM_STATUE",
+            // Copper chains (toutes versions d'oxydation)
+            "COPPER_CHAIN", "EXPOSED_COPPER_CHAIN",
+            "WEATHERED_COPPER_CHAIN", "OXIDIZED_COPPER_CHAIN",
+            "WAXED_COPPER_CHAIN", "WAXED_EXPOSED_COPPER_CHAIN",
+            "WAXED_WEATHERED_COPPER_CHAIN", "WAXED_OXIDIZED_COPPER_CHAIN",
+            // Blocs admin supplémentaires (26.1.2+)
+            "TEST_BLOCK", "TEST_INSTANCE_BLOCK",
+            // Ladders supplémentaires (26.1.2+)
+            "BAMBOO_LADDER", "OAK_LADDER", "SPRUCE_LADDER", "BIRCH_LADDER",
+            "JUNGLE_LADDER", "ACACIA_LADDER", "DARK_OAK_LADDER",
+            "MANGROVE_LADDER", "CHERRY_LADDER", "CRIMSON_LADDER", "WARPED_LADDER",
+            // Flower pots supplémentaires (26.1.2+)
+            "POTTED_PALE_OAK_SAPLING", "POTTED_EYEBLOSSOM",
+            "POTTED_OPEN_EYEBLOSSOM", "POTTED_CLOSED_EYEBLOSSOM",
+            "POTTED_WILDFLOWERS", "POTTED_CACTUS_FLOWER",
+            "POTTED_SHORT_DRY_GRASS", "POTTED_DRY_BUSH",
+            // Cactus flower (26.1.2+)
+            "CACTUS_FLOWER",
+            // Nouvelles plantes (26.1.2+)
+            "GOLDEN_DANDELION", "POTTED_GOLDEN_DANDELION",
+            "FIREFLY_BUSH",
+            // Shelf (26.1.2+)
+            "SHELF", "OAK_SHELF", "SPRUCE_SHELF", "BIRCH_SHELF",
+            "JUNGLE_SHELF", "ACACIA_SHELF", "DARK_OAK_SHELF",
+            "MANGROVE_SHELF", "CHERRY_SHELF", "BAMBOO_SHELF",
+            "CRIMSON_SHELF", "WARPED_SHELF", "PALE_OAK_SHELF",
+            // Dry grass (26.1.2+)
+            "DRY_GRASS", "TALL_DRY_GRASS", "SHORT_DRY_GRASS",
+            "DRY_BUSH", "DEAD_DRY_BUSH",
+            // Petals supplémentaires (26.1.2+)
+            "WHITE_PETALS", "ORANGE_PETALS", "MAGENTA_PETALS", "LIGHT_BLUE_PETALS",
+            "YELLOW_PETALS", "LIME_PETALS", "GRAY_PETALS", "LIGHT_GRAY_PETALS",
+            "CYAN_PETALS", "PURPLE_PETALS", "BLUE_PETALS", "BROWN_PETALS",
+            "GREEN_PETALS", "RED_PETALS", "BLACK_PETALS",
+            // Plantes supplémentaires (26.1.2+)
+            "PALE_OAK_SAPLING", "EYEBLOSSOM", "OPEN_EYEBLOSSOM", "CLOSED_EYEBLOSSOM",
+            "WILDFLOWERS", "LEAF_LITTER",
+            // Lightning rod cuivre (toutes versions d'oxydation)
+            "COPPER_LIGHTNING_ROD", "EXPOSED_COPPER_LIGHTNING_ROD",
+            "WEATHERED_COPPER_LIGHTNING_ROD", "OXIDIZED_COPPER_LIGHTNING_ROD",
+            "WAXED_COPPER_LIGHTNING_ROD", "WAXED_EXPOSED_COPPER_LIGHTNING_ROD",
+            "WAXED_WEATHERED_COPPER_LIGHTNING_ROD", "WAXED_OXIDIZED_COPPER_LIGHTNING_ROD",
             // Copper bars (toutes versions d'oxydation)
             "COPPER_BARS", "EXPOSED_COPPER_BARS",
             "WEATHERED_COPPER_BARS", "OXIDIZED_COPPER_BARS",
