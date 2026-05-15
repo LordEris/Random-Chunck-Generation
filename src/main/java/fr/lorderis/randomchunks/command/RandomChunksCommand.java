@@ -1,6 +1,7 @@
 package fr.lorderis.randomchunks.command;
 
 import fr.lorderis.randomchunks.BlockPool;
+import fr.lorderis.randomchunks.ChunkTransformer;
 import fr.lorderis.randomchunks.RandomChunksPlugin;
 import fr.lorderis.randomchunks.pregen.PregenerationTask;
 import org.bukkit.World;
@@ -51,6 +52,7 @@ public class RandomChunksCommand implements CommandExecutor, TabCompleter {
                 }
                 plugin.getDataManager().resetWorld(worldName);
                 plugin.getDataManager().save();
+                ChunkTransformer.evictWorld(worldName);
                 sender.sendMessage("§a[RandomChunks] Chunks réinitialisés pour le monde §e" + worldName + "§a.");
             }
             case "info" -> {

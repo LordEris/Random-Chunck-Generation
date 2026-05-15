@@ -1,6 +1,8 @@
 package fr.lorderis.randomchunks.pregen;
 
+import fr.lorderis.randomchunks.ChunkTransformer;
 import fr.lorderis.randomchunks.RandomChunksPlugin;
+import org.bukkit.Chunk;
 import org.bukkit.World;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -50,7 +52,11 @@ public class PregenerationTask extends BukkitRunnable {
             processed++;
 
             if (!plugin.getDataManager().isTransformed(world.getName(), cx, cz)) {
+                if (ChunkTransformer.isProtectedSpawn(plugin, world, cx, cz)) continue;
                 world.loadChunk(cx, cz, true);
+                Chunk chunk = world.getChunkAt(cx, cz);
+                plugin.getDataManager().markTransformed(world.getName(), cx, cz);
+                ChunkTransformer.transform(plugin, world, chunk);
                 world.unloadChunkRequest(cx, cz);
             }
         }
