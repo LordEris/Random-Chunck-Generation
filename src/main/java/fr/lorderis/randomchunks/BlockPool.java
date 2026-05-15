@@ -190,11 +190,146 @@ public class BlockPool {
             Material.POTTED_BAMBOO, Material.POTTED_TORCHFLOWER,
             Material.POTTED_CHERRY_SAPLING, Material.POTTED_MANGROVE_PROPAGULE
         );
-        for (String name : new String[]{"CHAIN"}) {
+        // Bell
+        EXCLUDED.add(Material.BELL);
+        // Amethyst buds & cluster
+        EXCLUDED.addAll(EnumSet.of(
+            Material.SMALL_AMETHYST_BUD, Material.MEDIUM_AMETHYST_BUD,
+            Material.LARGE_AMETHYST_BUD, Material.AMETHYST_CLUSTER
+        ));
+        // Daylight detector
+        EXCLUDED.add(Material.DAYLIGHT_DETECTOR);
+        // Walls
+        EXCLUDED.addAll(EnumSet.of(
+            Material.COBBLESTONE_WALL, Material.MOSSY_COBBLESTONE_WALL,
+            Material.STONE_BRICK_WALL, Material.MOSSY_STONE_BRICK_WALL,
+            Material.ANDESITE_WALL, Material.DIORITE_WALL, Material.GRANITE_WALL,
+            Material.BRICK_WALL, Material.PRISMARINE_WALL,
+            Material.RED_SANDSTONE_WALL, Material.SANDSTONE_WALL,
+            Material.END_STONE_BRICK_WALL,
+            Material.NETHER_BRICK_WALL, Material.RED_NETHER_BRICK_WALL,
+            Material.BLACKSTONE_WALL, Material.POLISHED_BLACKSTONE_WALL,
+            Material.POLISHED_BLACKSTONE_BRICK_WALL,
+            Material.DEEPSLATE_TILE_WALL, Material.DEEPSLATE_BRICK_WALL,
+            Material.COBBLED_DEEPSLATE_WALL, Material.POLISHED_DEEPSLATE_WALL,
+            Material.MUD_BRICK_WALL,
+            Material.TUFF_WALL, Material.TUFF_BRICK_WALL, Material.POLISHED_TUFF_WALL
+        ));
+        // Glass panes
+        EXCLUDED.addAll(EnumSet.of(
+            Material.GLASS_PANE,
+            Material.WHITE_STAINED_GLASS_PANE, Material.ORANGE_STAINED_GLASS_PANE,
+            Material.MAGENTA_STAINED_GLASS_PANE, Material.LIGHT_BLUE_STAINED_GLASS_PANE,
+            Material.YELLOW_STAINED_GLASS_PANE, Material.LIME_STAINED_GLASS_PANE,
+            Material.PINK_STAINED_GLASS_PANE, Material.GRAY_STAINED_GLASS_PANE,
+            Material.LIGHT_GRAY_STAINED_GLASS_PANE, Material.CYAN_STAINED_GLASS_PANE,
+            Material.PURPLE_STAINED_GLASS_PANE, Material.BLUE_STAINED_GLASS_PANE,
+            Material.BROWN_STAINED_GLASS_PANE, Material.GREEN_STAINED_GLASS_PANE,
+            Material.RED_STAINED_GLASS_PANE, Material.BLACK_STAINED_GLASS_PANE
+        ));
+        // Fences
+        EXCLUDED.addAll(EnumSet.of(
+            Material.OAK_FENCE, Material.SPRUCE_FENCE, Material.BIRCH_FENCE,
+            Material.JUNGLE_FENCE, Material.ACACIA_FENCE, Material.DARK_OAK_FENCE,
+            Material.MANGROVE_FENCE, Material.CHERRY_FENCE, Material.BAMBOO_FENCE,
+            Material.CRIMSON_FENCE, Material.WARPED_FENCE, Material.NETHER_BRICK_FENCE
+        ));
+        // Fence gates
+        EXCLUDED.addAll(EnumSet.of(
+            Material.OAK_FENCE_GATE, Material.SPRUCE_FENCE_GATE, Material.BIRCH_FENCE_GATE,
+            Material.JUNGLE_FENCE_GATE, Material.ACACIA_FENCE_GATE, Material.DARK_OAK_FENCE_GATE,
+            Material.MANGROVE_FENCE_GATE, Material.CHERRY_FENCE_GATE, Material.BAMBOO_FENCE_GATE,
+            Material.CRIMSON_FENCE_GATE, Material.WARPED_FENCE_GATE
+        ));
+        // Doors
+        EXCLUDED.addAll(EnumSet.of(
+            Material.OAK_DOOR, Material.SPRUCE_DOOR, Material.BIRCH_DOOR,
+            Material.JUNGLE_DOOR, Material.ACACIA_DOOR, Material.DARK_OAK_DOOR,
+            Material.MANGROVE_DOOR, Material.CHERRY_DOOR, Material.BAMBOO_DOOR,
+            Material.CRIMSON_DOOR, Material.WARPED_DOOR, Material.IRON_DOOR,
+            Material.COPPER_DOOR, Material.EXPOSED_COPPER_DOOR,
+            Material.WEATHERED_COPPER_DOOR, Material.OXIDIZED_COPPER_DOOR,
+            Material.WAXED_COPPER_DOOR, Material.WAXED_EXPOSED_COPPER_DOOR,
+            Material.WAXED_WEATHERED_COPPER_DOOR, Material.WAXED_OXIDIZED_COPPER_DOOR
+        ));
+        // Trapdoors
+        EXCLUDED.addAll(EnumSet.of(
+            Material.OAK_TRAPDOOR, Material.SPRUCE_TRAPDOOR, Material.BIRCH_TRAPDOOR,
+            Material.JUNGLE_TRAPDOOR, Material.ACACIA_TRAPDOOR, Material.DARK_OAK_TRAPDOOR,
+            Material.MANGROVE_TRAPDOOR, Material.CHERRY_TRAPDOOR, Material.BAMBOO_TRAPDOOR,
+            Material.CRIMSON_TRAPDOOR, Material.WARPED_TRAPDOOR, Material.IRON_TRAPDOOR,
+            Material.COPPER_TRAPDOOR, Material.EXPOSED_COPPER_TRAPDOOR,
+            Material.WEATHERED_COPPER_TRAPDOOR, Material.OXIDIZED_COPPER_TRAPDOOR,
+            Material.WAXED_COPPER_TRAPDOOR, Material.WAXED_EXPOSED_COPPER_TRAPDOOR,
+            Material.WAXED_WEATHERED_COPPER_TRAPDOOR, Material.WAXED_OXIDIZED_COPPER_TRAPDOOR
+        ));
+        // Beds
+        EXCLUDED.addAll(EnumSet.of(
+            Material.WHITE_BED, Material.ORANGE_BED, Material.MAGENTA_BED,
+            Material.LIGHT_BLUE_BED, Material.YELLOW_BED, Material.LIME_BED,
+            Material.PINK_BED, Material.GRAY_BED, Material.LIGHT_GRAY_BED,
+            Material.CYAN_BED, Material.PURPLE_BED, Material.BLUE_BED,
+            Material.BROWN_BED, Material.GREEN_BED, Material.RED_BED, Material.BLACK_BED
+        ));
+        // Cakes
+        EXCLUDED.addAll(EnumSet.of(
+            Material.CAKE,
+            Material.CANDLE_CAKE,
+            Material.WHITE_CANDLE_CAKE, Material.ORANGE_CANDLE_CAKE,
+            Material.MAGENTA_CANDLE_CAKE, Material.LIGHT_BLUE_CANDLE_CAKE,
+            Material.YELLOW_CANDLE_CAKE, Material.LIME_CANDLE_CAKE,
+            Material.PINK_CANDLE_CAKE, Material.GRAY_CANDLE_CAKE,
+            Material.LIGHT_GRAY_CANDLE_CAKE, Material.CYAN_CANDLE_CAKE,
+            Material.PURPLE_CANDLE_CAKE, Material.BLUE_CANDLE_CAKE,
+            Material.BROWN_CANDLE_CAKE, Material.GREEN_CANDLE_CAKE,
+            Material.RED_CANDLE_CAKE, Material.BLACK_CANDLE_CAKE
+        ));
+        // Moss
+        EXCLUDED.addAll(EnumSet.of(
+            Material.MOSS_BLOCK, Material.MOSS_CARPET,
+            Material.MOSSY_COBBLESTONE, Material.MOSSY_COBBLESTONE_SLAB,
+            Material.MOSSY_COBBLESTONE_STAIRS, Material.MOSSY_COBBLESTONE_WALL,
+            Material.MOSSY_STONE_BRICKS, Material.MOSSY_STONE_BRICK_SLAB,
+            Material.MOSSY_STONE_BRICK_STAIRS, Material.MOSSY_STONE_BRICK_WALL
+        ));
+        for (String name : new String[]{
+            "CHAIN",
+            "LIGHTNING_ROD",
+            // Pale Oak (1.21.4+)
+            "PALE_OAK_FENCE", "PALE_OAK_FENCE_GATE",
+            "PALE_OAK_SIGN", "PALE_OAK_WALL_SIGN",
+            "PALE_OAK_HANGING_SIGN", "PALE_OAK_WALL_HANGING_SIGN",
+            "PALE_HANGING_MOSS", "PALE_MOSS_BLOCK", "PALE_MOSS_CARPET",
+            // Copper Golem statues (toutes les variantes d'oxydation)
+            "COPPER_GOLEM_STATUE",
+            "EXPOSED_COPPER_GOLEM_STATUE",
+            "WEATHERED_COPPER_GOLEM_STATUE",
+            "OXIDIZED_COPPER_GOLEM_STATUE",
+            "WAXED_COPPER_GOLEM_STATUE",
+            "WAXED_EXPOSED_COPPER_GOLEM_STATUE",
+            "WAXED_WEATHERED_COPPER_GOLEM_STATUE",
+            "WAXED_OXIDIZED_COPPER_GOLEM_STATUE",
+            // Copper bars (toutes versions d'oxydation)
+            "COPPER_BARS", "EXPOSED_COPPER_BARS",
+            "WEATHERED_COPPER_BARS", "OXIDIZED_COPPER_BARS",
+            "WAXED_COPPER_BARS", "WAXED_EXPOSED_COPPER_BARS",
+            "WAXED_WEATHERED_COPPER_BARS", "WAXED_OXIDIZED_COPPER_BARS",
+            // Copper lanterns (toutes versions d'oxydation)
+            "COPPER_LANTERN", "EXPOSED_COPPER_LANTERN",
+            "WEATHERED_COPPER_LANTERN", "OXIDIZED_COPPER_LANTERN",
+            "WAXED_COPPER_LANTERN", "WAXED_EXPOSED_COPPER_LANTERN",
+            "WAXED_WEATHERED_COPPER_LANTERN", "WAXED_OXIDIZED_COPPER_LANTERN"
+        }) {
             Material mat = Material.matchMaterial(name);
             if (mat != null) EXCLUDED.add(mat);
         }
     }
+
+    // Blocs non remplaçables lors du scan (air + fluides uniquement)
+    private static final Set<Material> SCAN_EXCLUDED = EnumSet.of(
+            Material.AIR, Material.CAVE_AIR, Material.VOID_AIR,
+            Material.WATER, Material.LAVA
+    );
 
     private final Material[] pool;
 
@@ -230,8 +365,14 @@ public class BlockPool {
         return pool[ThreadLocalRandom.current().nextInt(pool.length)];
     }
 
+    // Utilisé pour filtrer le pool (matériaux non choisissables)
     public boolean isExcluded(Material material) {
         return EXCLUDED.contains(material);
+    }
+
+    // Utilisé pendant le scan : seuls l'air et les fluides sont ignorés
+    public boolean isScanExcluded(Material material) {
+        return SCAN_EXCLUDED.contains(material);
     }
 
     public int size() {

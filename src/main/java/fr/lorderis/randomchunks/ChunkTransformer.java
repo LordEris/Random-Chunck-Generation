@@ -59,7 +59,7 @@ public final class ChunkTransformer {
                         if (type.isAir()) continue;
                         if (type == material) continue;
                         if (preserveBedrock && type == Material.BEDROCK) continue;
-                        if (pool.isExcluded(type)) continue;
+                        if (pool.isScanExcluded(type)) continue;
                         buf[count    ] = x;
                         buf[count + 1] = y;
                         buf[count + 2] = z;
@@ -111,7 +111,7 @@ public final class ChunkTransformer {
                     if (type.isAir()) continue;
                     if (type == material) continue;
                     if (preserveBedrock && type == Material.BEDROCK) continue;
-                    if (plugin.getBlockPool().isExcluded(type)) continue;
+                    if (plugin.getBlockPool().isScanExcluded(type)) continue;
                     buf[count    ] = x;
                     buf[count + 1] = y;
                     buf[count + 2] = z;
