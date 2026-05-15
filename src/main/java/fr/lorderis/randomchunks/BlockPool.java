@@ -194,6 +194,10 @@ public class BlockPool {
         );
         // Chiseled bookshelf (bloc avec inventaire)
         EXCLUDED.add(Material.CHISELED_BOOKSHELF);
+        // End rod
+        EXCLUDED.add(Material.END_ROD);
+        // Grindstone
+        EXCLUDED.add(Material.GRINDSTONE);
         // Ladders
         EXCLUDED.add(Material.LADDER);
         // Bell
@@ -322,6 +326,15 @@ public class BlockPool {
             "WAXED_WEATHERED_COPPER_CHAIN", "WAXED_OXIDIZED_COPPER_CHAIN",
             // Blocs admin supplémentaires (26.1.2+)
             "TEST_BLOCK", "TEST_INSTANCE_BLOCK",
+            // Copper chests (26.1.2+)
+            "COPPER_CHEST", "EXPOSED_COPPER_CHEST",
+            "WEATHERED_COPPER_CHEST", "OXIDIZED_COPPER_CHEST",
+            "WAXED_COPPER_CHEST", "WAXED_EXPOSED_COPPER_CHEST",
+            "WAXED_WEATHERED_COPPER_CHEST", "WAXED_OXIDIZED_COPPER_CHEST",
+            // Pale oak (26.1.2+)
+            "PALE_OAK_BUTTON", "PALE_OAK_PRESSURE_PLATE",
+            // Pale oak door & trapdoor (26.1.2+)
+            "PALE_OAK_DOOR", "PALE_OAK_TRAPDOOR",
             // Ladders supplémentaires (26.1.2+)
             "BAMBOO_LADDER", "OAK_LADDER", "SPRUCE_LADDER", "BIRCH_LADDER",
             "JUNGLE_LADDER", "ACACIA_LADDER", "DARK_OAK_LADDER",
@@ -333,6 +346,8 @@ public class BlockPool {
             "POTTED_SHORT_DRY_GRASS", "POTTED_DRY_BUSH",
             // Cactus flower (26.1.2+)
             "CACTUS_FLOWER",
+            // Resin clump uniquement (les blocs resin peuvent se générer)
+            "RESIN_CLUMP",
             // Nouvelles plantes (26.1.2+)
             "GOLDEN_DANDELION", "POTTED_GOLDEN_DANDELION",
             "FIREFLY_BUSH",
@@ -368,8 +383,10 @@ public class BlockPool {
             "WAXED_COPPER_LANTERN", "WAXED_EXPOSED_COPPER_LANTERN",
             "WAXED_WEATHERED_COPPER_LANTERN", "WAXED_OXIDIZED_COPPER_LANTERN"
         }) {
-            Material mat = Material.matchMaterial(name);
-            if (mat != null) EXCLUDED.add(mat);
+            try {
+                Material mat = Material.valueOf(name);
+                if (mat.isBlock()) EXCLUDED.add(mat);
+            } catch (IllegalArgumentException ignored) {}
         }
     }
 
@@ -387,7 +404,8 @@ public class BlockPool {
 
         if (!configured.isEmpty()) {
             for (String name : configured) {
-                Material mat = Material.matchMaterial(name.toUpperCase());
+                Material mat = null;
+                try { mat = Material.valueOf(name.toUpperCase()); } catch (IllegalArgumentException ignored) {}
                 if (mat != null && mat.isBlock() && !EXCLUDED.contains(mat)) {
                     list.add(mat);
                 } else {
