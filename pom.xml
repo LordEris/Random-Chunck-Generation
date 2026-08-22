@@ -7,6 +7,15 @@
     <groupId>fr.lorderis</groupId>
     <artifactId>RandomChunks</artifactId>
     <version>1.0.0</version>
+
+    <licenses>
+        <license>
+            <name>CC BY-NC 4.0</name>
+            <url>https://creativecommons.org/licenses/by-nc/4.0/legalcode</url>
+            <distribution>repo</distribution>
+            <comments>Non-commercial use only. Videos and streams about the plugin are expressly permitted, monetisation included. See the LICENSE file.</comments>
+        </license>
+    </licenses>
     <packaging>jar</packaging>
 
     <name>RandomChunks</name>
