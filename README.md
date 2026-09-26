@@ -51,7 +51,7 @@ points d'intérêt des villages (lits, cloches, postes de travail) sont désenre
 |---|---|
 | `/randomchunks reload` | Relit la config et reconstruit la liste des blocs |
 | `/randomchunks info` | Nombre de blocs possibles, chunks remplis depuis le démarrage, réglages |
-| `/randomchunks pregen start <dimension> <rayon> [x z]` | Pré-génère un carré de chunks autour du spawn (ou de x z) |
+| `/randomchunks pregen start <dimension> <rayon> [x z]` | Pré-génère un carré de chunks autour de x z, ou du spawn du monde (de 0 0 dans les autres dimensions) |
 | `/randomchunks pregen stop` | Annule la pré-génération en cours |
 | `/randomchunks pregen status` | Affiche la progression |
 
@@ -114,8 +114,8 @@ soufre et cinabre, peuplier, dalles et escaliers de laine et de béton, champign
 paille, arbuste rouge. Les blocs pleins (planches, bûches et feuilles de peuplier, soufre, cinabre,
 blocs de résine…) font partie des tirages possibles ; les plantes et les blocs non pleins sont exclus.
 
-La liste des blocs retenus est affichée dans les logs au démarrage, avec un avertissement pour
-chaque id ou tag inconnu.
+Le nombre de blocs retenus est affiché dans les logs au démarrage et par `/randomchunks info`, avec
+un avertissement pour chaque id ou tag inconnu.
 
 ## Pré-génération
 
@@ -168,6 +168,8 @@ obfusqué : le projet n'utilise aucun mapping, les mixins visent directement les
 
 La CI construit le jar, le lance sur un vrai serveur Fabric, pré-génère les trois dimensions et
 vérifie dans les fichiers de région sauvegardés que chaque chunk généré est fait d'un seul bloc.
+Elle échoue aussi si un bloc ou un tag de la config par défaut n'existe pas dans la version de
+Minecraft visée.
 
 ## Licence
 

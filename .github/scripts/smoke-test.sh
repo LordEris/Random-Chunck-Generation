@@ -73,7 +73,7 @@ kill -0 "$SERVER_PID" 2>/dev/null && fail "the server did not stop"
 wait "$SERVER_PID" || true
 
 echo "----- mod log lines -----"
-grep -E 'Random chunks|blocks in the pool|Filling new chunks|\[Pregen\]|missing key|block pool' server.log || true
+grep -E 'Random chunks|blocks in the pool|Filling new chunks|\[Pregen\]|missing key|block pool|excludedBlocks:|blockPool:' server.log || true
 
 for dimension in minecraft:overworld minecraft:the_nether minecraft:the_end; do
   grep -q "Filling new chunks of $dimension" server.log || fail "no chunk was filled in $dimension"
@@ -85,5 +85,9 @@ if grep -qE 'Exception|Crash report' server.log; then
   fail "the log holds an exception"
 fi
 grep -q 'random-chunks.json: added missing key' server.log || fail "missing config keys were not added"
+# Every block and tag of the default excludedBlocks must exist in this Minecraft version.
+if grep -qE 'excludedBlocks:|blockPool:' server.log; then
+  fail "the default config names a block or tag this version does not have"
+fi
 
 python3 "$SCRIPTS/check_world.py" random-chunks world
