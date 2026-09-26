@@ -1,183 +1,151 @@
 package fr.lorderis.randomchunks.command;
 
-import fr.lorderis.randomchunks.BlockPool;
-import fr.lorderis.randomchunks.ChunkTransformer;
-import fr.lorderis.randomchunks.RandomChunksPlugin;
-import fr.lorderis.randomchunks.pregen.PregenerationTask;
-import org.bukkit.World;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.tree.LiteralCommandNode;
+import fr.lorderis.randomchunks.RandomChunks;
+import fr.lorderis.randomchunks.config.RcgConfig;
+import fr.lorderis.randomchunks.gen.BlockPool;
+import fr.lorderis.randomchunks.pregen.PregenTask;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.DimensionArgument;
+import net.minecraft.commands.arguments.coordinates.ColumnPosArgument;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ColumnPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.storage.LevelData;
 
-import java.util.List;
-import java.util.stream.Collectors;
+/**
+ * {@code /randomchunks} (alias {@code /rcg}), for operators: reload, info and pregeneration.
+ */
+public final class RandomChunksCommand {
+    private static final int MAX_RADIUS = 5000;
 
-public class RandomChunksCommand implements CommandExecutor, TabCompleter {
-
-    private final RandomChunksPlugin plugin;
-
-    public RandomChunksCommand(RandomChunksPlugin plugin) {
-        this.plugin = plugin;
+    private RandomChunksCommand() {
     }
 
-    @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!sender.hasPermission("randomchunks.admin")) {
-            sender.sendMessage("§cVous n'avez pas la permission.");
-            return true;
-        }
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+        LiteralCommandNode<CommandSourceStack> root = dispatcher.register(Commands.literal("randomchunks")
+                .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                .executes(c -> help(c.getSource(), "randomchunks"))
+                .then(Commands.literal("reload").executes(c -> reload(c.getSource())))
+                .then(Commands.literal("info").executes(c -> info(c.getSource())))
+                .then(Commands.literal("pregen")
+                        .then(Commands.literal("start")
+                                .then(Commands.argument("dimension", DimensionArgument.dimension())
+                                        .then(Commands.argument("radius", IntegerArgumentType.integer(1, MAX_RADIUS))
+                                                .executes(c -> startPregen(c, null))
+                                                .then(Commands.argument("center", ColumnPosArgument.columnPos())
+                                                        .executes(c -> startPregen(c, ColumnPosArgument.getColumnPos(c, "center")))))))
+                        .then(Commands.literal("stop").executes(c -> stopPregen(c.getSource())))
+                        .then(Commands.literal("status").executes(c -> pregenStatus(c.getSource())))));
 
-        if (args.length == 0) {
-            sendHelp(sender, label);
-            return true;
-        }
-
-        switch (args[0].toLowerCase()) {
-            case "reload" -> {
-                plugin.reloadConfig();
-                plugin.updateConfig();
-                sender.sendMessage("§a[RandomChunks] Configuration rechargée et mise à jour.");
-            }
-            case "reset" -> {
-                if (args.length < 2) {
-                    sender.sendMessage("§cUsage: /" + label + " reset <world>");
-                    return true;
-                }
-                String worldName = args[1];
-                World world = plugin.getServer().getWorld(worldName);
-                if (world == null) {
-                    sender.sendMessage("§cMonde introuvable : " + worldName);
-                    return true;
-                }
-                plugin.getDataManager().resetWorld(worldName);
-                plugin.getDataManager().save();
-                ChunkTransformer.evictWorld(worldName);
-                sender.sendMessage("§a[RandomChunks] Chunks réinitialisés pour le monde §e" + worldName + "§a.");
-            }
-            case "info" -> {
-                BlockPool pool = plugin.getBlockPool();
-                sender.sendMessage("§b[RandomChunks] §fBlocs dans le pool : §e" + pool.size());
-                sender.sendMessage("§b[RandomChunks] §fChunks transformés : §e" + plugin.getDataManager().totalTransformed());
-            }
-            case "pregen" -> {
-                if (args.length < 2) {
-                    sender.sendMessage("§cUsage: /" + label + " pregen <start|stop|status>");
-                    return true;
-                }
-                switch (args[1].toLowerCase()) {
-                    case "start" -> {
-                        if (args.length < 4) {
-                            sender.sendMessage("§cUsage: /" + label + " pregen start <monde> <rayon> [x z]");
-                            return true;
-                        }
-                        World world = plugin.getServer().getWorld(args[2]);
-                        if (world == null) {
-                            sender.sendMessage("§cMonde introuvable : " + args[2]);
-                            return true;
-                        }
-                        int radius;
-                        try {
-                            radius = Integer.parseInt(args[3]);
-                        } catch (NumberFormatException e) {
-                            sender.sendMessage("§cRayon invalide : " + args[3]);
-                            return true;
-                        }
-                        if (radius <= 0 || radius > 5000) {
-                            sender.sendMessage("§cRayon doit être entre 1 et 5000.");
-                            return true;
-                        }
-                        if (plugin.getPregenerationTask() != null) {
-                            sender.sendMessage("§cUne prégen est déjà en cours. Utilisez /" + label + " pregen stop d'abord.");
-                            return true;
-                        }
-                        int centerCX, centerCZ;
-                        if (args.length >= 6) {
-                            try {
-                                centerCX = Integer.parseInt(args[4]) >> 4;
-                                centerCZ = Integer.parseInt(args[5]) >> 4;
-                            } catch (NumberFormatException e) {
-                                sender.sendMessage("§cCoordonnées invalides.");
-                                return true;
-                            }
-                        } else {
-                            centerCX = world.getSpawnLocation().getBlockX() >> 4;
-                            centerCZ = world.getSpawnLocation().getBlockZ() >> 4;
-                        }
-                        PregenerationTask task = new PregenerationTask(plugin, world, centerCX, centerCZ, radius);
-                        plugin.setPregenerationTask(task);
-                        task.runTaskTimer(plugin, 0L, 1L);
-                        sender.sendMessage("§a[RandomChunks] Prégen démarrée sur §e" + world.getName()
-                                + "§a, rayon §e" + radius + " §achunks (§e" + task.getTotal() + " §achunks au total).");
-                        plugin.getLogger().info("[Pregen] Démarrage sur " + world.getName()
-                                + ", rayon " + radius + " (" + task.getTotal() + " chunks).");
-                    }
-                    case "stop" -> {
-                        PregenerationTask task = plugin.getPregenerationTask();
-                        if (task == null) {
-                            sender.sendMessage("§cAucune prégen en cours.");
-                            return true;
-                        }
-                        task.cancel();
-                        plugin.setPregenerationTask(null);
-                        sender.sendMessage("§a[RandomChunks] Prégen annulée ("
-                                + task.getProgress() + "/" + task.getTotal() + " chunks traités).");
-                    }
-                    case "status" -> {
-                        PregenerationTask task = plugin.getPregenerationTask();
-                        if (task == null) {
-                            sender.sendMessage("§7[RandomChunks] Aucune prégen en cours.");
-                            return true;
-                        }
-                        int pct = task.getProgress() * 100 / task.getTotal();
-                        sender.sendMessage("§b[RandomChunks] Prégen §e" + task.getWorldName()
-                                + "§b : §e" + task.getProgress() + "§b/§e" + task.getTotal()
-                                + " §b(§e" + pct + "%§b)");
-                    }
-                    default -> sender.sendMessage("§cUsage: /" + label + " pregen <start|stop|status>");
-                }
-            }
-            default -> sendHelp(sender, label);
-        }
-        return true;
+        dispatcher.register(Commands.literal("rcg")
+                .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                .executes(c -> help(c.getSource(), "rcg"))
+                .redirect(root));
     }
 
-    private void sendHelp(CommandSender sender, String label) {
-        sender.sendMessage("§b--- RandomChunks ---");
-        sender.sendMessage("§e/" + label + " reload §f- Recharge la config");
-        sender.sendMessage("§e/" + label + " reset <monde> §f- Réinitialise les chunks d'un monde");
-        sender.sendMessage("§e/" + label + " info §f- Affiche les statistiques du plugin");
-        sender.sendMessage("§e/" + label + " pregen start <monde> <rayon> [x z] §f- Lance la prégen");
-        sender.sendMessage("§e/" + label + " pregen stop §f- Annule la prégen en cours");
-        sender.sendMessage("§e/" + label + " pregen status §f- Affiche la progression");
+    private static int help(CommandSourceStack source, String label) {
+        source.sendSuccess(() -> Component.literal("--- Random Chunks ---").withStyle(ChatFormatting.AQUA), false);
+        line(source, label, "reload", "reload the config and rebuild the block pool");
+        line(source, label, "info", "show the block pool and what has been generated");
+        line(source, label, "pregen start <dimension> <radius> [x z]", "generate chunks ahead of time");
+        line(source, label, "pregen stop", "cancel the running pregeneration");
+        line(source, label, "pregen status", "show its progress");
+        return 1;
     }
 
-    @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        if (args.length == 1) {
-            return List.of("reload", "reset", "info", "pregen").stream()
-                    .filter(s -> s.startsWith(args[0].toLowerCase()))
-                    .collect(Collectors.toList());
+    private static void line(CommandSourceStack source, String label, String usage, String description) {
+        source.sendSuccess(() -> Component.literal("/" + label + " " + usage).withStyle(ChatFormatting.YELLOW)
+                .append(Component.literal(" - " + description).withStyle(ChatFormatting.WHITE)), false);
+    }
+
+    private static int reload(CommandSourceStack source) {
+        BlockPool pool = RandomChunks.reload();
+        for (String warning : pool.warnings()) {
+            source.sendFailure(Component.literal(warning));
         }
-        if (args.length == 2) {
-            if (args[0].equalsIgnoreCase("reset")) {
-                return plugin.getServer().getWorlds().stream()
-                        .map(World::getName)
-                        .filter(n -> n.startsWith(args[1]))
-                        .collect(Collectors.toList());
-            }
-            if (args[0].equalsIgnoreCase("pregen")) {
-                return List.of("start", "stop", "status").stream()
-                        .filter(s -> s.startsWith(args[1].toLowerCase()))
-                        .collect(Collectors.toList());
-            }
+        if (pool.isEmpty()) {
+            source.sendFailure(Component.literal("[Random Chunks] The block pool is empty: new chunks will not be changed."));
+            return 0;
         }
-        if (args.length == 3 && args[0].equalsIgnoreCase("pregen") && args[1].equalsIgnoreCase("start")) {
-            return plugin.getServer().getWorlds().stream()
-                    .map(World::getName)
-                    .filter(n -> n.startsWith(args[2]))
-                    .collect(Collectors.toList());
+        source.sendSuccess(() -> Component.literal("[Random Chunks] Config reloaded, " + pool.size() + " blocks in the pool.")
+                .withStyle(ChatFormatting.GREEN), true);
+        return pool.size();
+    }
+
+    private static int info(CommandSourceStack source) {
+        RcgConfig config = RandomChunks.config();
+        BlockPool pool = RandomChunks.pool();
+        source.sendSuccess(() -> Component.literal("[Random Chunks] ").withStyle(ChatFormatting.AQUA)
+                .append(Component.literal(config.enabled ? "enabled" : "disabled in the config")
+                        .withStyle(config.enabled ? ChatFormatting.GREEN : ChatFormatting.RED)), false);
+        source.sendSuccess(() -> Component.literal("Dimensions: " + String.join(", ", config.dimensions)), false);
+        source.sendSuccess(() -> Component.literal("Blocks in the pool: " + pool.size()), false);
+        source.sendSuccess(() -> Component.literal("Chunks filled since the server started: " + RandomChunks.filledChunks()), false);
+        source.sendSuccess(() -> Component.literal("Spawn protection radius: " + config.spawnProtectionRadius + " chunks"), false);
+        return pool.size();
+    }
+
+    private static int startPregen(CommandContext<CommandSourceStack> context, ColumnPos center) throws CommandSyntaxException {
+        CommandSourceStack source = context.getSource();
+        ServerLevel level = DimensionArgument.getDimension(context, "dimension");
+        int radius = IntegerArgumentType.getInteger(context, "radius");
+
+        if (PregenTask.isRunning()) {
+            source.sendFailure(Component.literal("A pregeneration is already running. Use /randomchunks pregen stop first."));
+            return 0;
         }
-        return List.of();
+
+        ChunkPos centerChunk;
+        if (center != null) {
+            centerChunk = center.toChunkPos();
+        } else {
+            // Around the world spawn when it is in that dimension, around 0,0 otherwise.
+            LevelData.RespawnData spawn = level.getRespawnData();
+            centerChunk = spawn != null && spawn.dimension().equals(level.dimension())
+                    ? ChunkPos.containing(spawn.pos())
+                    : ChunkPos.ZERO;
+        }
+
+        PregenTask task = PregenTask.start(level, centerChunk, radius);
+        if (task == null) {
+            source.sendFailure(Component.literal("A pregeneration is already running."));
+            return 0;
+        }
+        source.sendSuccess(() -> Component.literal("[Random Chunks] Pregeneration started in " + task.dimensionName()
+                + ", radius " + radius + " around chunk " + centerChunk.x() + ", " + centerChunk.z()
+                + " (" + task.total() + " chunks).").withStyle(ChatFormatting.GREEN), true);
+        return task.total();
+    }
+
+    private static int stopPregen(CommandSourceStack source) {
+        PregenTask task = PregenTask.stop();
+        if (task == null) {
+            source.sendFailure(Component.literal("No pregeneration is running."));
+            return 0;
+        }
+        source.sendSuccess(() -> Component.literal("[Random Chunks] Pregeneration cancelled (" + task.done() + "/"
+                + task.total() + " chunks generated).").withStyle(ChatFormatting.GREEN), true);
+        RandomChunks.LOGGER.info("[Pregen] {} cancelled at {}/{}.", task.dimensionName(), task.done(), task.total());
+        return task.done();
+    }
+
+    private static int pregenStatus(CommandSourceStack source) {
+        PregenTask task = PregenTask.active();
+        if (task == null) {
+            source.sendSuccess(() -> Component.literal("[Random Chunks] No pregeneration is running.").withStyle(ChatFormatting.GRAY), false);
+            return 0;
+        }
+        source.sendSuccess(() -> Component.literal("[Random Chunks] Pregeneration of " + task.dimensionName() + ": "
+                + task.done() + "/" + task.total() + " (" + task.percent() + "%), "
+                + PregenTask.formatTime(task.elapsedSeconds()) + " elapsed").withStyle(ChatFormatting.AQUA), false);
+        return task.percent();
     }
 }
