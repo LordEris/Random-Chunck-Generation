@@ -55,62 +55,62 @@ members() {
   ' "$f"
 }
 
+# Prints `lines` lines of a decompiled class starting at the first line matching the regex.
+around() {
+  local cls=$1 re=$2 lines=$3
+  rm -rf "$work/in" "$work/out"
+  mkdir -p "$work/in" "$work/out"
+  (cd "$work/in" && unzip -qo "$MC" "${cls}.class" >/dev/null 2>&1)
+  java -jar "$VF" -e="$MC" "$work/in" "$work/out" >"$work/vf.log" 2>&1 || tail -20 "$work/vf.log"
+  local f
+  f=$(find "$work/out" -name '*.java' | head -1)
+  echo "=================== ${cls} from /${re}/ (${lines} lines)"
+  grep -nE "$re" "$f" | head -3
+  local n
+  n=$(grep -nE "$re" "$f" | head -1 | cut -d: -f1)
+  [ -n "$n" ] && sed -n "${n},$((n + lines))p" "$f"
+}
+
 case "$GROUP" in
-  a)
-    list '^net/minecraft/world/level/chunk/status/'
-    decomp net/minecraft/world/level/chunk/status/ChunkStatusTasks \
-           net/minecraft/world/level/chunk/status/ChunkStatus \
-           net/minecraft/world/level/chunk/status/ChunkPyramid \
-           net/minecraft/server/level/WorldGenRegion \
-           net/minecraft/world/level/chunk/ChunkGenerator
-    for c in net/minecraft/world/level/levelgen/NoiseBasedChunkGenerator net/minecraft/world/level/levelgen/FlatLevelSource net/minecraft/world/level/levelgen/DebugLevelSource; do
-      echo "=================== overrides in $c"
-      javap -p -cp "$MC" "${c//\//.}" 2>&1 | grep -iE 'decorat|feature|class ' || true
+  g)
+    P=net/minecraft/world/level/levelgen
+    decomp $P/placement/FeaturePlacer $P/feature/OverlayFeature $P/feature/SequenceFeature $P/feature/TemplateFeature \
+           $P/feature/RandomSelectorFeature $P/feature/WeightedRandomSelectorFeature $P/feature/SimpleRandomSelectorFeature \
+           $P/feature/RandomBooleanSelectorFeature $P/feature/WeightedPlacedFeature $P/feature/RootSystemFeature \
+           $P/feature/VegetationPatchFeature $P/feature/SingleBlockPillarFeature $P/feature/MonsterRoomFeature
+    ;;
+  h)
+    mkdir -p "$work/all" && (cd "$work/all" && unzip -qo "$MC" 'net/*' >/dev/null 2>&1)
+    desc='(Lnet/minecraft/world/level/WorldGenLevel;Lnet/minecraft/world/level/chunk/ChunkGenerator;Lnet/minecraft/util/RandomSource;Lnet/minecraft/core/BlockPos;)Z'
+    echo "=================== classes calling Feature.place"
+    for f in $(grep -rlF "$desc" "$work/all"); do
+      c=${f#$work/all/}; c=${c%.class}
+      hits=$(javap -c -p -cp "$work/all" "${c//\//.}" 2>/dev/null | grep -nE 'invokeinterface.*levelgen/feature/Feature\.place|^  [a-z].*\(' | grep -B1 'invokeinterface' | grep -v '^--$')
+      [ -n "$hits" ] && { echo "--- $c"; echo "$hits"; }
     done
+    echo "=================== classes using FeaturePlacer"
+    grep -rlF 'net/minecraft/world/level/levelgen/placement/FeaturePlacer' "$work/all" | sed "s#$work/all/##" | sort
+    echo "=================== classes using BulkSectionAccess"
+    grep -rlF 'net/minecraft/world/level/chunk/BulkSectionAccess' "$work/all" | sed "s#$work/all/##" | sort
+    echo "=================== feature classes writing LevelChunkSection directly"
+    for f in $(grep -rlF 'net/minecraft/world/level/chunk/LevelChunkSection' "$work/all/net/minecraft/world/level/levelgen"); do
+      c=${f#$work/all/}; c=${c%.class}
+      javap -c -p -cp "$work/all" "${c//\//.}" 2>/dev/null | grep -q 'LevelChunkSection.setBlockState' && echo "$c"
+    done
+    echo "=================== FeatureTypes registrations"
+    around net/minecraft/world/level/levelgen/feature/FeatureTypes 'class FeatureTypes' 90
     ;;
-  b)
-    list '^net/minecraft/world/level/levelgen/feature/[^/]*\.class$'
-    list '^net/minecraft/world/level/levelgen/(placement|structure)/[^/]*\.class$' | grep -E 'Placed|StructureStart|Template'
-    decomp net/minecraft/world/level/levelgen/feature/ConfiguredFeature \
-           net/minecraft/world/level/levelgen/feature/Feature \
-           net/minecraft/world/level/levelgen/feature/FeatureType \
-           net/minecraft/world/level/levelgen/placement/PlacedFeature \
-           net/minecraft/world/level/levelgen/feature/OreFeature \
-           net/minecraft/world/level/chunk/BulkSectionAccess \
-           net/minecraft/world/level/levelgen/structure/StructureStart
+  i)
+    around net/minecraft/server/MinecraftServer 'private static void setInitialSpawn' 70
+    around net/minecraft/server/MinecraftServer ' void prepareLevels' 45
+    around net/minecraft/server/level/ServerChunkCache 'addTicketAndLoadWithRadius' 25
+    around net/minecraft/server/level/ServerChunkCache 'public void removeTicketWithRadius' 8
+    around net/minecraft/commands/Commands 'getDispatcher' 4
     ;;
-  c)
-    jp net/minecraft/world/level/chunk/ChunkAccess net/minecraft/world/level/chunk/ProtoChunk \
-       net/minecraft/world/level/chunk/ImposterProtoChunk net/minecraft/world/level/chunk/LevelChunkSection \
-       net/minecraft/world/level/levelgen/Heightmap 'net/minecraft/world/level/levelgen/Heightmap$Types' \
-       'net/minecraft/world/level/block/state/BlockBehaviour$BlockStateBase' net/minecraft/world/level/block/Block \
-       net/minecraft/world/level/block/Fallable net/minecraft/world/level/block/LiquidBlock \
-       net/minecraft/world/level/block/LeavesBlock net/minecraft/world/level/material/FlowingFluid \
-       net/minecraft/world/entity/ai/village/poi/PoiTypes net/minecraft/world/level/LevelHeightAccessor \
-       net/minecraft/world/level/chunk/LevelChunk
-    ;;
-  d)
-    jp net/minecraft/server/level/ServerLevel net/minecraft/server/level/ServerChunkCache \
-       net/minecraft/world/level/storage/LevelData net/minecraft/world/level/storage/ServerLevelData \
-       'net/minecraft/world/level/storage/LevelData$RespawnData' net/minecraft/server/players/PlayerList
-    decomp net/minecraft/server/level/TicketType
-    members net/minecraft/server/MinecraftServer '^   [a-zA-Z@].* (loadLevel|createLevels|setInitialSpawn|tickServer|tickChildren|stopServer|halt|overworld|getRespawnData|findRespawnDimension|getWorldData)[(]'
-    members net/minecraft/server/level/ServerLevel '^   [a-zA-Z@].* (onBlockStateChange|getSharedSpawnPos|getRespawnData|getSeed|updatePOIOnBlockStateChange)[(]'
-    ;;
-  e)
-    list '^net/minecraft/server/permissions/'
-    decomp net/minecraft/commands/Commands net/minecraft/server/commands/ForceLoadCommand \
-           net/minecraft/server/commands/SetWorldSpawnCommand
-    jp net/minecraft/commands/CommandSourceStack net/minecraft/commands/arguments/DimensionArgument
-    for c in $(list '^net/minecraft/server/permissions/[^$]*\.class$' | sed 's/\.class$//'); do jp "$c"; done
-    javap -p -cp "$MC" net.minecraft.network.chat.Component 2>&1 | grep -E 'literal|translatable|interface' || true
-    ;;
-  f)
-    jp net/minecraft/core/Registry net/minecraft/resources/Identifier net/minecraft/resources/ResourceKey \
-       net/minecraft/tags/TagKey net/minecraft/tags/BlockTags net/minecraft/util/RandomSource \
-       net/minecraft/core/registries/BuiltInRegistries net/minecraft/core/registries/Registries
-    list '^net/minecraft/world/level/block/[^/]*\.class$' | grep -iE 'sulfur|cinnabar|poplar|straw|shelf|shrub|bush|leaf|dried|golem|lantern|chain|bars|torch|spike'
-    members net/minecraft/world/level/block/Blocks '^   public static final Block [A-Z_]*(SULFUR|CINNABAR|POPLAR|STRAW|SHELF|SHRUB|BUSH|LEAF_LITTER|DRIED_GHAST|IRON_CHAIN|COPPER_CHAIN|COPPER_BARS|COPPER_LANTERN|COPPER_TORCH|LIGHTNING_ROD|GOLDEN_DANDELION|WILDFLOWERS|CACTUS_FLOWER|EYEBLOSSOM|RESIN|CREAKING)'
-    for c in $(list '^net/minecraft/world/level/block/[^/$]*\.class$' | grep -iE 'sulfur|cinnabar|poplar|straw|shelfmushroom|shrub|driedghast' | sed 's/\.class$//'); do decomp "$c"; done
+  j)
+    jp net/minecraft/core/TypedInstance net/minecraft/world/level/ChunkPos net/minecraft/commands/arguments/coordinates/ColumnPosArgument \
+       net/minecraft/server/level/ColumnPos net/minecraft/world/level/block/SpeleothemBlock net/minecraft/world/level/block/PointedDripstoneBlock \
+       net/minecraft/world/level/block/StrawBedBlock net/minecraft/world/level/block/AbstractBedBlock net/minecraft/world/level/block/BedBlock \
+       net/minecraft/world/level/WorldGenLevel net/minecraft/world/level/block/state/StateHolder net/minecraft/core/Holder
     ;;
 esac
