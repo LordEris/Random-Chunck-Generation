@@ -132,7 +132,10 @@ def section_counts(section):
     states = section.get("block_states")
     if not states:
         return Counter()
-    palette = [entry["Name"] for entry in states.get("palette", [])]
+    # Up to 26.2 a palette entry is a compound with a Name; since 26.3 it is a string such as
+    # "minecraft:oak_stairs[facing=east,half=bottom,...]".
+    palette = [entry["Name"] if isinstance(entry, dict) else str(entry).split("[", 1)[0]
+               for entry in states.get("palette", [])]
     data = states.get("data")
     if data is None or len(data) == 0 or len(palette) == 1:
         return Counter({palette[0]: 4096}) if palette else Counter()
