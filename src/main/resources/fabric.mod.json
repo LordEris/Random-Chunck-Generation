@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "randomchunks",
+  "version": "${version}",
+  "name": "Random Chunks",
+  "description": "Every chunk is made of a single random block. Terrain, caves, ores, trees and structures are all rebuilt from one block type per chunk, picked from the world seed, in the Overworld, the Nether and the End.",
+  "authors": [
+    "LordEris"
+  ],
+  "contact": {
+    "sources": "https://github.com/LordEris/Random-Chunck-Generation",
+    "issues": "https://github.com/LordEris/Random-Chunck-Generation/issues"
+  },
+  "license": "CC-BY-NC-4.0",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "fr.lorderis.randomchunks.RandomChunks"
+    ]
+  },
+  "mixins": [
+    "randomchunks.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "minecraft": "~${minecraft_version}",
+    "java": ">=25"
+  }
+}

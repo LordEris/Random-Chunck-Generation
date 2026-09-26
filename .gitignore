@@ -1,5 +1,23 @@
-target/
-*.class
-*.iml
+# Gradle
+.gradle/
+build/
+out/
+classes/
+
+# Loom
+.fabric/
+run/
+
+# IDE
 .idea/
+*.iml
+*.ipr
+*.iws
 .vscode/
+.settings/
+.classpath
+.project
+bin/
+
+# OS
+.DS_Store
