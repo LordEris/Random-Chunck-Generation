@@ -94,8 +94,8 @@ case "$GROUP" in
        net/minecraft/world/level/storage/LevelData net/minecraft/world/level/storage/ServerLevelData \
        'net/minecraft/world/level/storage/LevelData$RespawnData' net/minecraft/server/players/PlayerList
     decomp net/minecraft/server/level/TicketType
-    members net/minecraft/server/MinecraftServer '^   [a-zA-Z@].* (loadLevel|createLevels|setInitialSpawn|tickServer|tickChildren|stopServer|halt|overworld|getRespawnData|findRespawnDimension|getWorldData)\('
-    members net/minecraft/server/level/ServerLevel '^   [a-zA-Z@].* (onBlockStateChange|getSharedSpawnPos|getRespawnData|getSeed|updatePOIOnBlockStateChange)\('
+    members net/minecraft/server/MinecraftServer '^   [a-zA-Z@].* (loadLevel|createLevels|setInitialSpawn|tickServer|tickChildren|stopServer|halt|overworld|getRespawnData|findRespawnDimension|getWorldData)[(]'
+    members net/minecraft/server/level/ServerLevel '^   [a-zA-Z@].* (onBlockStateChange|getSharedSpawnPos|getRespawnData|getSeed|updatePOIOnBlockStateChange)[(]'
     ;;
   e)
     list '^net/minecraft/server/permissions/'
